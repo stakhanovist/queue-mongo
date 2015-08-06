@@ -5,7 +5,9 @@ Stakhanovist MongoDb Queue Adapter
 
 > MongoDb adapter for Stakhanovist queues
 
-This library provide a MongoDb driven queue, with message awaiting support ([using capped collection and tailable cursor](http://shtylman.com/post/the-tail-of-mongodb))
+This library provide a **MongoDB** driven queue.
+
+Using capped collection and tailable cursor ([reference here](http://shtylman.com/post/the-tail-of-mongodb)) this library supports also **message awaiting**.
 
 ## Usage
 
