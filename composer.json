@@ -1,0 +1,50 @@
+{
+  "name": "stakhanovist/queue-mongodb",
+  "description": "MongoDb adapter for Stakhanovist queues",
+  "type": "library",
+  "license": "BSD-2-Clause",
+  "authors": [
+    {
+      "name": "Leonardo Grasso",
+      "email": "me@leonardograsso.com",
+      "homepage": "http://github.com/leogr"
+    },
+    {
+      "name": "Leonardo Di Donato",
+      "email": "leodidonato@gmail.com",
+      "homepage": "http://github.com/leodido"
+    }
+  ],
+  "keywords": [
+    "mongodb",
+    "adapter",
+    "mongo",
+    "nosql"
+  ],
+  "homepage": "https://github.com/stakhanovist/queue-mongodb",
+  "autoload": {
+    "psr-4": {
+      "Stakhanovist\\Queue\\Adapter\\MongoDb": "library"
+    }
+  },
+  "autoload-dev": {
+    "psr-4": {
+      "StakhanovistQueueAdapterMongoDbTest\\": "tests"
+    }
+  },
+  "require": {
+    "php": ">=5.5",
+    "ext-mongo": "*",
+    "stakhanovist/queue": "0.2.*@dev"
+  },
+  "require-dev": {
+    "phpunit/phpunit": "~4.7",
+    "satooshi/php-coveralls": "dev-master"
+  },
+  "extra": {
+    "branch-alias": {
+      "dev-master": "0.1.x-dev",
+      "dev-develop": "0.2.x-dev"
+    }
+  }
+}
