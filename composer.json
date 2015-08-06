@@ -24,7 +24,7 @@
   "homepage": "https://github.com/stakhanovist/queue-mongodb",
   "autoload": {
     "psr-4": {
-      "Stakhanovist\\Queue\\Adapter\\MongoDb": "library"
+      "Stakhanovist\\Queue\\Adapter\\MongoDb\\": "library"
     }
   },
   "autoload-dev": {
@@ -39,7 +39,8 @@
   },
   "require-dev": {
     "phpunit/phpunit": "~4.7",
-    "satooshi/php-coveralls": "dev-master"
+    "satooshi/php-coveralls": "dev-master",
+    "zendframework/zend-config": "~2.3"
   },
   "extra": {
     "branch-alias": {
