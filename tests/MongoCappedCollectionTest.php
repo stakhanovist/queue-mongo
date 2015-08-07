@@ -22,6 +22,16 @@ use StakhanovistQueueTest\Adapter\AdapterTest;
 class MongoCappedCollectionTest extends AdapterTest
 {
     /**
+     * @var string
+     */
+    protected $dbName;
+
+    /**
+     * @var string
+     */
+    protected $server;
+
+    /**
      * {@inheritdoc}
      */
     public function setUp()
@@ -29,6 +39,9 @@ class MongoCappedCollectionTest extends AdapterTest
         if (!extension_loaded('mongo')) {
             $this->markTestSkipped('The mongo PHP extension is not available');
         }
+
+        $this->dbName = 'StakhanovistQueueMongoCappedCollectionTest';
+        $this->server = "mongodb://" . getenv('MONGODB_HOST') . ":". getenv('MONGODB_PORT');
     }
 
     /**
@@ -65,7 +78,8 @@ class MongoCappedCollectionTest extends AdapterTest
     {
         return [
             'driverOptions' => [
-                'db' => 'stakhanovist_queue_test_capped'
+                'db' => $this->dbName,
+                'dsn' => $this->server . '/' . $this->dbName
             ]
         ];
     }
@@ -111,7 +125,7 @@ class MongoCappedCollectionTest extends AdapterTest
     }
 
     /**
-     * @expectedException \Stakhanovist\Queue\Exception\RuntimeException
+     * @expectedException RuntimeException
      */
     public function testAwaitMessagesWithoutSecondLast()
     {

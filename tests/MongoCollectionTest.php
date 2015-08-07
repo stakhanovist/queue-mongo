@@ -18,12 +18,24 @@ use StakhanovistQueueTest\Adapter\AdapterTest;
  */
 class MongoCollectionTest extends AdapterTest
 {
+    /**
+     * @var string
+     */
+    protected $dbName;
+
+    /**
+     * @var string
+     */
+    protected $server;
 
     public function setUp()
     {
         if (!extension_loaded('mongo')) {
             $this->markTestSkipped('The mongo PHP extension is not available');
         }
+
+        $this->dbName = 'StakhanovistQueueMongoCollectionTest';
+        $this->server = "mongodb://" . getenv('MONGODB_HOST') . ":". getenv('MONGODB_PORT');
     }
 
     /**
@@ -53,7 +65,8 @@ class MongoCollectionTest extends AdapterTest
     {
         return [
             'driverOptions' => [
-            'db' => 'StakhanovistQueueTest'
+                'db' => $this->dbName,
+                'dsn' => $this->server . '/' . $this->dbName
             ]
         ];
     }

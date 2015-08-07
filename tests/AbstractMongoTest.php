@@ -18,9 +18,12 @@ use StakhanovistQueueAdapterMongoDbTest\TestAsset\ConcreteMongo;
 
 /**
  * Class AbstractMongoTest
+ *
+ * @group abs
  */
 class AbstractMongoTest extends \PHPUnit_Framework_TestCase
 {
+
     /**
      * @var \MongoClient
      */
@@ -34,7 +37,7 @@ class AbstractMongoTest extends \PHPUnit_Framework_TestCase
     /**
      * @var string
      */
-    protected $database;
+    protected $dbName;
 
     /**
      * @var string
@@ -46,18 +49,22 @@ class AbstractMongoTest extends \PHPUnit_Framework_TestCase
      */
     protected $mongoDb;
 
+    /**
+     * @var string
+     */
+    protected $server;
+
     public function setUp()
     {
         if (!extension_loaded('mongo')) {
             $this->markTestSkipped('The mongo PHP extension is not available');
         }
 
-        $this->database = 'stakhanovist_queue_mongoabstract_test';
+        $this->dbName = 'StakhanovistQueueMongoAbstractTest';
+        $this->server = "mongodb://" . getenv('MONGODB_HOST') . ":". getenv('MONGODB_PORT');
 
-        $this->collection = 'queue';
-
-        $this->mongo = new \MongoClient;
-        $this->mongoDb = $this->mongo->selectDb($this->database);
+        $this->mongo = new \MongoClient($this->server . '/' . $this->dbName);
+        $this->mongoDb = $this->mongo->selectDb($this->dbName);
         $this->mongoDb->drop(); // cleanup
 
         $this->abstractMongo = new ConcreteMongo(
@@ -69,11 +76,11 @@ class AbstractMongoTest extends \PHPUnit_Framework_TestCase
 
     public function testConnect()
     {
-        //Test with params
+        // Test with params
         $abstractMongo = new ConcreteMongo(
             [
                 'driverOptions' => [
-                    'db' => $this->database,
+                    'db' => $this->dbName,
                     'options' => ["connect" => true]
                 ]
             ]
@@ -84,20 +91,19 @@ class AbstractMongoTest extends \PHPUnit_Framework_TestCase
         $abstractMongo = new ConcreteMongo(
             [
                 'driverOptions' => [
-                    'dsn' => 'mongodb://localhost:27017/' . $this->database
+                    'dsn' => $this->server . '/' . $this->dbName
                 ]
             ]
         );
 
         $this->assertTrue($abstractMongo->connect());
 
-        //Test passing MongoDB instance
+        // Test passing MongoDB instance
         $this->assertTrue($this->abstractMongo->connect());
 
-        //Test invalid options excepetion
+        // Test invalid options excepetion
         $this->setExpectedException(InvalidArgumentException::class);
-
-        $abstractMongo = new ConcreteMongo();
+        $abstractMongo = new ConcreteMongo;
         $abstractMongo->connect();
     }
 
@@ -127,14 +133,14 @@ class AbstractMongoTest extends \PHPUnit_Framework_TestCase
 
     public function testReceiveMessageAtomicWithNoMessage()
     {
-        //assume queue is empty
-        $queue = new Queue('foo', new Null());
+        // Assume queue is empty
+        $queue = new Queue('foo', new Null); // FIXME: rename into NullAdapter
         $this->abstractMongo->connect();
         $this->assertNull(
             $this->abstractMongo->receiveMessageAtomic(
                 $queue,
                 $this->mongoDb->selectCollection('non-existing-collection'),
-                new \MongoId()
+                new \MongoId
             )
         );
     }
