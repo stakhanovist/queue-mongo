@@ -16,7 +16,10 @@
     }
   ],
   "keywords": [
+    "queue",
     "mongodb",
+    "message",
+    "await",
     "adapter",
     "mongo",
     "nosql"
