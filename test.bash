@@ -4,7 +4,7 @@
 
 # variables
 declare DATA_PATH="${DATA_PATH:-${PWD}/data/mongo}"
-declare -a TAGS=("2.4" "2.6") # "3.0")
+declare -a TAGS=("2.4" "2.6" "3.0")
 declare IMG=mongo
 declare -i PORT=27017
 declare DOCKER_BIN=$(which docker 2>/dev/null)
