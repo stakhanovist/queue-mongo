@@ -33,7 +33,8 @@
   "autoload-dev": {
     "psr-4": {
       "StakhanovistQueueAdapterMongoDbTest\\": "tests"
-    }
+    },
+    "files": ["vendor/stakhanovist/queue/tests/Adapter/AdapterTest.php"]
   },
   "require": {
     "php": ">=5.5",

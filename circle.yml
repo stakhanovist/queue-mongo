@@ -1,0 +1,11 @@
+machine:
+  services:
+    - docker
+dependencies:
+  cache_directories:
+    - "~/docker"
+    - "~/deps"
+test:
+  override:
+    - ./test.bash:
+      parallel: true

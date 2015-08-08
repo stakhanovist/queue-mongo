@@ -1,4 +1,4 @@
-<phpunit bootstrap="tests/bootstrap.php" colors="true" verbose="true">
+<phpunit bootstrap="tests/bootstrap.php" colors="true">
     <testsuites>
         <testsuite name="Stakhanovist MongoDb Queue Adapter Test Suite">
             <directory>tests</directory>

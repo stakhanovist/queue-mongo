@@ -9,7 +9,7 @@
 namespace StakhanovistQueueAdapterMongoDbTest;
 
 use Stakhanovist\Queue\Adapter\MongoDb\MongoCappedCollection;
-use Stakhanovist\Queue\Adapter\Null;
+use Stakhanovist\Queue\Adapter\NullAdapter;
 use Stakhanovist\Queue\Exception\ConnectionException;
 use Stakhanovist\Queue\Exception\InvalidArgumentException;
 use Stakhanovist\Queue\Exception\RuntimeException;
@@ -18,8 +18,6 @@ use StakhanovistQueueAdapterMongoDbTest\TestAsset\ConcreteMongo;
 
 /**
  * Class AbstractMongoTest
- *
- * @group abs
  */
 class AbstractMongoTest extends \PHPUnit_Framework_TestCase
 {
@@ -134,7 +132,7 @@ class AbstractMongoTest extends \PHPUnit_Framework_TestCase
     public function testReceiveMessageAtomicWithNoMessage()
     {
         // Assume queue is empty
-        $queue = new Queue('foo', new Null); // FIXME: rename into NullAdapter
+        $queue = new Queue('foo', new NullAdapter);
         $this->abstractMongo->connect();
         $this->assertNull(
             $this->abstractMongo->receiveMessageAtomic(

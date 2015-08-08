@@ -12,14 +12,14 @@ use Stakhanovist\Queue\Adapter\MongoDb\MongoCappedCollection;
 use Stakhanovist\Queue\Adapter\MongoDb\MongoCollection;
 use Stakhanovist\Queue\Exception\RuntimeException;
 use Stakhanovist\Queue\Message\Message;
-use StakhanovistQueueTest\Adapter\AdapterTest;
+use StakhanovistQueueTest\Adapter\AdapterTest as QueueAdapterTest;
 
 /**
  * Class MongoCappedCollectionTest
  *
  * All methods marked not supported are explictly checked for for throwing an exception.
  */
-class MongoCappedCollectionTest extends AdapterTest
+class MongoCappedCollectionTest extends QueueAdapterTest
 {
     /**
      * @var string
@@ -45,26 +45,7 @@ class MongoCappedCollectionTest extends AdapterTest
     }
 
     /**
-     * getAdapterName() is an method to help make AdapterTest work with any
-     * new adapters
-     *
-     * You must overload this method
-     *
-     * @return string
-     */
-    public function getAdapterName()
-    {
-        return 'MongoCappedCollection';
-    }
-
-    /**
-     * getAdapterName() is an method to help make AdapterTest work with any
-     * new adapters
-     *
-     * You may overload this method.  The default return is
-     * 'Stakhanovist_Queue_Adapter_' . $this->getAdapterName()
-     *
-     * @return string
+     * {@inheritdoc}
      */
     public function getAdapterFullName()
     {

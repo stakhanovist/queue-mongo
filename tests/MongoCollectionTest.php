@@ -9,14 +9,14 @@
 namespace StakhanovistQueueAdapterMongoDbTest;
 
 use Stakhanovist\Queue\Adapter\MongoDb\MongoCollection;
-use StakhanovistQueueTest\Adapter\AdapterTest;
+use StakhanovistQueueTest\Adapter\AdapterTest as QueueAdapterTest;
 
 /**
  * Class MongoCollectionTest
  *
  * All methods marked not supported are explictly checked for for throwing an exception.
  */
-class MongoCollectionTest extends AdapterTest
+class MongoCollectionTest extends QueueAdapterTest
 {
     /**
      * @var string
@@ -39,19 +39,7 @@ class MongoCollectionTest extends AdapterTest
     }
 
     /**
-     * Retrieve the class of the MongoCollection adapter
-     *
-     * @return string
-     */
-    public function getAdapterName()
-    {
-        return 'MongoCollection';
-    }
-
-    /**
-     * Retrieve the FQN of the MongoCollection adapter
-     *
-     * @return string
+     * {@inheritdoc}
      */
     public function getAdapterFullName()
     {
