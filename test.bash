@@ -5,6 +5,7 @@
 # variables
 declare DATA_PATH="${DATA_PATH:-${PWD}/data/mongo}"
 declare -a TAGS=("2.4" "2.6" "3.0")
+declare -a PHPS=("5.5" "5.6")
 declare IMG=mongo
 declare -i PORT=27017
 declare DOCKER_BIN=$(which docker 2>/dev/null)
@@ -16,6 +17,11 @@ printf_sep() {
     local NUM=$2
     local SEP=$(printf "%-${NUM}s" "${STR}")
     echo "${SEP// /${STR}}"
+}
+array_contains() {
+    local i
+    for i in "${@:2}"; do [[ "$i" == "$1" ]] && return 0; done
+    return 1
 }
 mongorm() {
     echo "Removing ${1} container and data ..."
@@ -53,14 +59,19 @@ main() {
          echo "Please install PHP."
          exit 1
     fi
+    # get PHP simple version
+    local PHP_VERSION=$(php -r 'echo sprintf("%s.%s", PHP_MAJOR_VERSION, PHP_MINOR_VERSION);')
+    # check php version is supported
+    array_contains "${PHP_VERSION}" "${PHPS[@]}"
+    if [ $? -ne 0 ] ; then
+        echo -e "PHP ${PHP_VERSION} not supported.\nExit ..."
+        exit 1
+    fi
 
     if [[ ${CI} ]] ; then
         # continuous integration
         echo 'ciao'
     else
-        # get PHP simple version
-        local PHP_VERSION=$(php -r 'echo sprintf("%s.%s", PHP_MAJOR_VERSION, PHP_MINOR_VERSION);')
-
         # check whether mongo php driver is missing
         local MONGO_EXT_MISSING=$(php -r 'echo extension_loaded("mongo") ? "false" : "true";')
         if [ "${MONGO_EXT_MISSING}" = true ] ; then
