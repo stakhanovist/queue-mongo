@@ -21,7 +21,6 @@ use StakhanovistQueueAdapterMongoDbTest\TestAsset\ConcreteMongo;
  */
 class AbstractMongoTest extends \PHPUnit_Framework_TestCase
 {
-
     /**
      * @var \MongoClient
      */
