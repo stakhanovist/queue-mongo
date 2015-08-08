@@ -73,6 +73,41 @@ abstract class AbstractMongo extends AbstractAdapter implements CountMessagesCap
     }
 
     /**
+     * @param array $adapterOptions
+     * @return MongoDB
+     */
+    protected function getMongoDBInstance(array $adapterOptions)
+    {
+        $driverOptions = $adapterOptions['driverOptions'];
+
+        $dsn = isset($driverOptions['dsn']) ?
+            $driverOptions['dsn'] :
+            'mongodb://' . ini_get('mongo.default_host') . ':' . ini_get('mongo.default_port');
+
+        $database = null;
+        if (isset($driverOptions['db'])) {
+            $database = $driverOptions['db'];
+        } else {
+            // Extract db name from dsn
+            $dsnParts = explode('/', $dsn);
+            if (!empty($dsnParts[3])) {
+                $database = $dsnParts[3];
+            }
+        }
+
+        if (!$database) {
+            throw new Exception\InvalidArgumentException(
+                __FUNCTION__ . ' expects a "db" key to be present or it must be contained into "dsn" value'
+            );
+        }
+
+        $mongoClient = isset($driverOptions['options']) ?
+            new \MongoClient($dsn, $driverOptions['options']) :
+            new \MongoClient($dsn);
+        return $mongoClient->selectDB($database);
+    }
+
+    /**
      * Ensure connection
      *
      * @return bool
@@ -85,39 +120,7 @@ abstract class AbstractMongo extends AbstractAdapter implements CountMessagesCap
             $this->mongoDb = $adapterOptions['mongoDb'];
             return true;
         }
-
-        $mongoClass = (version_compare(phpversion('mongo'), '1.3.0', '<')) ? 'Mongo' : 'MongoClient';
-        $driverOptions = $adapterOptions['driverOptions'];
-
-        $dsn = isset($driverOptions['dsn']) ?
-            $driverOptions['dsn'] :
-            'mongodb://' . ini_get('mongo.default_host') . ':' . ini_get('mongo.default_port');
-
-        $db = null;
-        if (isset($driverOptions['db'])) {
-            $db = $driverOptions['db'];
-        } else {
-            //Extract db name from dsn
-            $dsnParts = explode('/', $dsn);
-            if (!empty($dsnParts[3])) {
-                $db = $dsnParts[3];
-            }
-        }
-
-        if (!$db) {
-            throw new Exception\InvalidArgumentException(
-                __FUNCTION__ . ' expects a "db" key to be present or it must be contained into "dsn" value'
-            );
-        }
-
-        if (isset($driverOptions['options'])) {
-            $mongoClient = new $mongoClass($dsn, $driverOptions['options']);
-        } else {
-            $mongoClient = new $mongoClass($dsn);
-        }
-
-        /** @var $mongoClient \MongoClient */
-        $this->mongoDb = $mongoClient->selectDB($db);
+        $this->mongoDb = $this->getMongoDBInstance($adapterOptions);
 
         return true;
     }
@@ -221,9 +224,9 @@ abstract class AbstractMongo extends AbstractAdapter implements CountMessagesCap
 
         $collection = $this->getMongoDb()->selectCollection($queue->getName());
 
-        $id = new MongoId;
+        $messageId = new MongoId;
         $msg = [
-            '_id' => $id,
+            '_id' => $messageId,
             self::KEY_CLASS => get_class($message),
             self::KEY_CONTENT => (string)$message->getContent(),
             self::KEY_METADATA => $message->getMetadata(),
@@ -236,7 +239,7 @@ abstract class AbstractMongo extends AbstractAdapter implements CountMessagesCap
             throw new Exception\RuntimeException($e->getMessage(), $e->getCode(), $e);
         }
 
-        $this->embedMessageInfo($queue, $message, $id, $params ? $params->toArray() : []);
+        $this->embedMessageInfo($queue, $message, $messageId, $params ? $params->toArray() : []);
 
         return $message;
     }

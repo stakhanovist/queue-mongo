@@ -54,13 +54,16 @@ main() {
          echo "Please install docker."
          exit 1
     fi
+
     # check php is installed
     if [ -z "${PHP_BIN}" ] ; then
          echo "Please install PHP."
          exit 1
     fi
+
     # get PHP simple version
     local PHP_VERSION=$(php -r 'echo sprintf("%s.%s", PHP_MAJOR_VERSION, PHP_MINOR_VERSION);')
+
     # check php version is supported
     array_contains "${PHP_VERSION}" "${PHPS[@]}"
     if [ $? -ne 0 ] ; then

@@ -143,7 +143,7 @@ class MongoCappedCollection extends AbstractMongo implements AwaitMessagesCapabl
      * @param  QueueInterface $queue
      * @param  callable $callback
      * @param  ReceiveParametersInterface $params
-     * @return MongoCappedCollection|null
+     * @return MongoCappedCollection
      * @throws Exception\RuntimeException
      */
     public function awaitMessages(QueueInterface $queue, $callback, ReceiveParametersInterface $params = null)
@@ -177,7 +177,6 @@ class MongoCappedCollection extends AbstractMongo implements AwaitMessagesCapabl
          */
 
         do {
-
             // Obtain the second last position
             $cursor = $collection->find()->sort(['_id' => -1]);
             $cursor->skip(1);
@@ -201,18 +200,16 @@ class MongoCappedCollection extends AbstractMongo implements AwaitMessagesCapabl
 
             // Inner loop: read results and wait for more
             do {
-
                 // We don't need sleeping because at beginning of each loop hasNext() will await.
                 // If we are at the end of results, hasNext() blocks execution for a while,
                 // after a timeout period (or if cursor dies) it does return as normal.
                 if (!$cursor->hasNext()) {
-
-                    // is cursor dead ?
+                    // Is cursor dead ?
                     if ($cursor->dead()) {
                         // TODO: if we repeately get a dead cursor, an inf loop or a temporary CPU high load may occur
-                        break; // go to the outer loop, obtaining a new cursor
+                        break; // Go to the outer loop, obtaining a new cursor
                     }
-                    // else, we read all results so far, wait for more
+                    // Else, we read all results so far, wait for more
                 } else {
                     $msg = $cursor->getNext();
 
@@ -221,12 +218,12 @@ class MongoCappedCollection extends AbstractMongo implements AwaitMessagesCapabl
                         continue; //inner loop
                     }
 
-                    // we got the _id of a non-handled message, try to receive it
+                    // We got the _id of a non-handled message, try to receive it
                     $msg = $this->receiveMessageAtomic($queue, $collection, $msg['_id']);
 
-                    // if meanwhile message has been handled already then we ignore it
+                    // If meanwhile message has been handled already then we ignore it
                     if (null === $msg) {
-                        continue; //inner loop
+                        continue; // Inner loop
                     }
 
                     // Ok, message received
@@ -235,7 +232,7 @@ class MongoCappedCollection extends AbstractMongo implements AwaitMessagesCapabl
                         return $this;
                     }
                 }
-            } while (true); // inner loop
+            } while (true); // Inner loop
 
             // No message, timeout occured
             $iterator = new $classname([], $queue);
@@ -243,7 +240,5 @@ class MongoCappedCollection extends AbstractMongo implements AwaitMessagesCapabl
                 return $this;
             }
         } while (true);
-
-        return null;
     }
 }
