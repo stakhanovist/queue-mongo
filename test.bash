@@ -100,6 +100,8 @@ main() {
         # fixed local php, local mongo php ext, test library against various mongo versions/tags
         for TAG in "${TAGS[@]}"
         do
+            [[ "${TAG}" != "${TAGS[@]:0:1}" ]] && printf_sep "=" 80
+
             # check compatibilities
             # http://docs.mongodb.org/ecosystem/drivers/driver-compatibility-reference/#reference-compatibility-mongodb-php
             if [ ${TAG} = "2.6" ] && [ ${MONGO_EXT_VERSION} = "1.3" ]; then
@@ -111,7 +113,6 @@ main() {
                 exit 1
             fi
 
-            [[ "${TAG}" != "${TAGS[@]:0:1}" ]] && printf_sep "=" 80
             echo "Test against ${IMG}:${TAG}"
 
             # Create container

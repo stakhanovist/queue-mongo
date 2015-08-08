@@ -267,6 +267,19 @@ abstract class AbstractMongo extends AbstractAdapter implements CountMessagesCap
     }
 
     /**
+     * Retrieve the second last element
+     *
+     * @param MongoCollection $collection
+     * @return array
+     */
+    protected function getSecondLast(MongoCollection $collection)
+    {
+        $cursor = $collection->find()->sort(['_id' => -1]);
+        $cursor->skip(1);
+        return $cursor->getNext();
+    }
+
+    /**
      * @param QueueInterface $queue
      * @param MongoCollection $collection
      * @param mixed $id

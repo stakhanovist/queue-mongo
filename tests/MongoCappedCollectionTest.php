@@ -67,10 +67,10 @@ class MongoCappedCollectionTest extends QueueAdapterTest
 
     public function testShouldThrowExceptionOnExistingNonCappedCollection()
     {
-        $mongoNonCappedAdapter = new MongoCollection();
-        $mongoNonCappedAdapter->setOptions($this->getTestOptions());
-        $mongoNonCappedAdapter->connect();
-        $mongoNonCappedAdapter->createQueue(__FUNCTION__);
+        $nonCappedAdapter = new MongoCollection;
+        $nonCappedAdapter->setOptions($this->getTestOptions());
+        $nonCappedAdapter->connect();
+        $nonCappedAdapter->createQueue(__FUNCTION__);
 
         $this->setExpectedException(RuntimeException::class);
         $this->createQueue(__FUNCTION__);

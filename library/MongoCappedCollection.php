@@ -116,9 +116,9 @@ class MongoCappedCollection extends AbstractMongo implements AwaitMessagesCapabl
             throw new Exception\RuntimeException('Cannot send message: capped collection is full.');
         }
 
-        $id = new MongoId;
+        $messageId = new MongoId;
         $msg = [
-            '_id' => $id,
+            '_id' => $messageId,
             self::KEY_CLASS => get_class($message),
             self::KEY_CONTENT => (string)$message->getContent(),
             self::KEY_METADATA => $message->getMetadata(),
@@ -131,7 +131,7 @@ class MongoCappedCollection extends AbstractMongo implements AwaitMessagesCapabl
             throw new Exception\RuntimeException($e->getMessage(), $e->getCode(), $e);
         }
 
-        $this->embedMessageInfo($queue, $message, $id, $params ? $params->toArray() : []);
+        $this->embedMessageInfo($queue, $message, $messageId, $params ? $params->toArray() : []);
 
         return $message;
     }
@@ -149,7 +149,7 @@ class MongoCappedCollection extends AbstractMongo implements AwaitMessagesCapabl
     public function awaitMessages(QueueInterface $queue, $callback, ReceiveParametersInterface $params = null)
     {
         $classname = $queue->getOptions()->getMessageSetClass();
-        $collection = $this->getMongoDb()->selectCollection($queue->getName());
+        $col = $this->getMongoDb()->selectCollection($queue->getName());
 
         /**
          * If the query doesn't match any documents, MongoDB does not keep a cursor open server side and thus
@@ -162,41 +162,30 @@ class MongoCappedCollection extends AbstractMongo implements AwaitMessagesCapabl
          * Solution:
          * - we use handled-message as dummy documents, furthermore
          *   create() inserts dummy documents when the collection is created to avoid empty collection at first use.
-         *
          * - finally, to get a valid cursor but to avoid re-reading already handled message
          *   we shouldn't start reading from the beginnig of the collection, so we get the second-last document position
          *   then we setup the query to start from the next position.
          *
          * Therefore tailable cursor will start from the last document always.
          *
-         * Inspired by
-         *
-         * @link http://shtylman.com/post/the-tail-of-mongodb
+         * Inspired by @link http://shtylman.com/post/the-tail-of-mongodb
          *
          * @FIXME: classFilter is not supported yet
          */
 
         do {
             // Obtain the second last position
-            $cursor = $collection->find()->sort(['_id' => -1]);
-            $cursor->skip(1);
-            $secondLast = $cursor->getNext();
-
-            if (!$secondLast) {
+            $last2nd = $this->getSecondLast($col);
+            if (!$last2nd) {
                 throw new Exception\RuntimeException(
-                    'Cannot get second-last position, maybe there are not enough documents within the collection'
+                    'Cannot get second last position, maybe there are not enough documents within the collection'
                 );
             }
 
             // Setup tailable cursor
-            $cursor = $this->setupCursor(
-                $collection,
-                null,
-                ['_id' => ['$gt' => $secondLast['_id']]],
-                ['_id', self::KEY_HANDLE]
-            );
-            $cursor->tailable(true);
-            $cursor->awaitData(true);
+            $cursor = $this->setupCursor($col, null, ['_id' => ['$gt' => $last2nd['_id']]], ['_id', self::KEY_HANDLE])
+                           ->tailable(true)
+                           ->awaitData(true);
 
             // Inner loop: read results and wait for more
             do {
@@ -206,11 +195,11 @@ class MongoCappedCollection extends AbstractMongo implements AwaitMessagesCapabl
                 if (!$cursor->hasNext()) {
                     // Is cursor dead ?
                     if ($cursor->dead()) {
-                        // TODO: if we repeately get a dead cursor, an inf loop or a temporary CPU high load may occur
+                        // NOTE: if we repeately get a dead cursor, an inf loop or a temporary CPU high load may occur
                         break; // Go to the outer loop, obtaining a new cursor
                     }
-                    // Else, we read all results so far, wait for more
                 } else {
+                    // Else, we read all results so far, wait for more
                     $msg = $cursor->getNext();
 
                     // To avoid resource-consuming, we ignore handled message early
@@ -219,7 +208,7 @@ class MongoCappedCollection extends AbstractMongo implements AwaitMessagesCapabl
                     }
 
                     // We got the _id of a non-handled message, try to receive it
-                    $msg = $this->receiveMessageAtomic($queue, $collection, $msg['_id']);
+                    $msg = $this->receiveMessageAtomic($queue, $col, $msg['_id']);
 
                     // If meanwhile message has been handled already then we ignore it
                     if (null === $msg) {
